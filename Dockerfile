@@ -6,6 +6,7 @@ RUN apt-key adv --keyserver pgp.mit.edu --recv-keys 573BFD6B3D8FBC641079A6ABABF5
 RUN echo "deb http://nginx.org/packages/mainline/debian/ wheezy nginx" >> /etc/apt/sources.list
 
 ENV NGINX_VERSION 1.7.10-1~wheezy
+ENV NEO4J_HOSTNAME localhost
 
 RUN apt-get update && \
     apt-get install -y ca-certificates nginx=${NGINX_VERSION} && \
@@ -15,8 +16,13 @@ RUN apt-get update && \
 RUN ln -sf /dev/stdout /var/log/nginx/access.log
 RUN ln -sf /dev/stderr /var/log/nginx/error.log
 
+ADD default-template.conf /default-template.conf
+ADD start.sh /start.sh
+RUN chmod +x /start.sh
+
 VOLUME ["/var/cache/nginx"]
+VOLUME ["/etc/nginx"]
 
-EXPOSE 80 443
+EXPOSE 7474
 
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["/bin/bash", "-c", "/start.sh"]
